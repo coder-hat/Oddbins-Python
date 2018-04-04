@@ -18,8 +18,11 @@ Wikipedia: https://en.wikipedia.org/wiki/Sierpinski_triangle
 # Tried using PhotoImage in this code, but got no image -- commented out try, and returned
 # to using "truncated" create_oval for now.
 
-#import random
-from tkinter import *  # For Python version 3.2 or higher.
+from tkinter import Tk  # For Python version 3.2 or higher.
+from tkinter import Canvas
+from tkinter import YES
+from tkinter import BOTH
+
 from SierpinskiTriangle import SierpinskiTriangle
 
 # ---- main program

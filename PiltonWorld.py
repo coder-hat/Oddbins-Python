@@ -4,7 +4,7 @@
 _CELL_COLS = 7
 _CELL_ROWS = 7
 
-#----- particle class, particle class!  particle class has location and mass.
+#----- particle class, particle class! particle class has location and mass.
 
 class PiltonParticle(tuple):
     '''
@@ -65,22 +65,6 @@ class PiltonWorldState:
         self.timestep = 0
         self.particles = []
 
-    # @property
-    # def timestep(self):
-    #     return self.timestep
-
-    # @timestep.setter
-    # def timestep(self, t):
-    #     self.timestep = t
-    
-    # @property
-    # def particles(self):
-    #     return self.particles
-    
-    # @particles.setter
-    # def particles(self, particles):
-    #     self.particles = particles
-
     def do_simulation_step(self):
         t = self.timestep + 1
         self.particles = coalesce_particles(decay_particles(t, coalesce_particles(move_particles(t, self.particles))))
@@ -130,22 +114,6 @@ def move_particles(t, particles):
     Returns a new list of the particles in their new positions.
     '''
     return [move_particle(t, p, find_others(p, particles)) for p in particles]
-
-    # protected List<PiltonParticle> moveParticles(List<PiltonParticle> particles) {
-    #     List<PiltonParticle> nxtParticles = new ArrayList<>();
-    #     LinkedList<PiltonParticle> unprocessed = new LinkedList<>(particles);
-    #     while (!unprocessed.isEmpty()) {
-    #         PiltonParticle p = unprocessed.removeFirst();
-    #         Set<PiltonParticle> molecule = findMolecule(p, particles);
-    #         List<PiltonParticle> notMolecule = new LinkedList<>(particles);
-    #         notMolecule.removeAll(molecule);
-    #         for (PiltonParticle m : molecule) {
-    #             nxtParticles.add(moveParticle(m, notMolecule));
-    #         }
-    #         unprocessed.removeAll(molecule);
-    #     }
-    #     return nxtParticles;
-    # }
 
 def coalesce_particles(particles):
     '''

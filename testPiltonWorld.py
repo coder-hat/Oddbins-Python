@@ -40,7 +40,7 @@ class TestPiltonWorld(unittest.TestCase):
         self.EXPECT_WORLD_SEQUENCE[18] = makeParticles((3,3,6), (3,5,3), (5,3,3)) 
         self.EXPECT_WORLD_SEQUENCE[21] = makeParticles((3,3,6), (2,6,3), (2,1,3), (6,2,3), (1,2,3)) 
         self.EXPECT_WORLD_SEQUENCE[24] = makeParticles((5,5,6), (6,2,3), (6,0,3), (2,6,3), (0,6,3)) 
-        self.EXPECT_WORLD_SEQUENCE[27] = makeParticles((5,5,6), (0,4,3), (0,5,3), (0,0,6), (5,0,3)) 
+        self.EXPECT_WORLD_SEQUENCE[27] = makeParticles((5,5,6), (0,4,3), (0,5,3), (0,0,6), (5,0,3), (4,0,3)) 
         self.EXPECT_WORLD_SEQUENCE[30] = makeParticles((3,3,6), (6,1,6), (1,1,6), (1,6,6)) 
         self.EXPECT_WORLD_SEQUENCE[36] = makeParticles((2,2,6), (6,4,6), (4,4,6), (4,6,6)) 
         self.EXPECT_WORLD_SEQUENCE[42] = makeParticles((1,1,6), (4,6,6), (6,6,6), (6,4,6))

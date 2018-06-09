@@ -1,10 +1,13 @@
-# Implmentation of the "Small World" described in Barry Pilton's original article:
-# https://ianstewartjoat.weebly.com/manifold-5.html
+'''
+An implementation of the "Small World" described in Barry Pilton's article:
+"A Small World", Manifold, Autumn 1969 issue, pgs 49-53.
+https://ianstewartjoat.weebly.com/manifold-5.html
+'''
 
 _CELL_COLS = 7
 _CELL_ROWS = 7
 
-#----- particle class, particle class! particle class has location and mass.
+#----- particle class, particle class, particle class has location and mass!
 
 class PiltonParticle(tuple):
     '''
@@ -49,7 +52,7 @@ class PiltonParticle(tuple):
         y_match = (other.y == (self.y - 1) % row_count) or (other.y == (self.y + 1) % row_count)
         return (x_match and other.y == self.y) or (y_match and other.x == self.x)
 
-    # "The goal of str is to be [human] readable ..."    
+    # When overriding __str__, "The goal of str is to be [human] readable ..."    
     # https://stackoverflow.com/questions/1436703/difference-between-str-and-repr
     def __str__(self):
         '''
@@ -71,11 +74,20 @@ class PiltonWorldState:
         self.timestep = t
 
 #---- functions that change the world
+#
+# NOTE 2018-6-09
+# These functions exist only to change PiltonWorld state.
+# They should probably be encapsulated inside PiltonWorldState class.
+# But, if they were member functions, there'd be no sense in passing in timestep (or particles, in some cases).
+# Having them global makes the parameters explicit, which in turn makes unit testing them easier.
+# However, some of these "global" functions rely on the global column and row dimensions,
+# and that's something it would be nice to allow the user to modify per world in a GUI setting,
+# so they're not *really* independent as-is.
 
 def find_molecule(p, particles):
     '''
     Returns the set of PiltonParticles in particles that are edge-adjacent-reachable to each other,
-    starting at -- and including -- PiltonParticle p.
+    starting at and including PiltonParticle p.
     Two particles are edge adjacent if they share a common cell edge.
     Diagonal-adjacency (sharing a common cell corner) does not count for molecule membership.
     '''
@@ -117,9 +129,9 @@ def move_particles(t, particles):
 
 def coalesce_particles(particles):
     '''
-    Takes specified list of PiltonParticles and returns a new list by coalescing
-    every particle that shares the same location into one particle with the sum
-    of co-located particles masses.
+    Takes the specified list of PiltonParticles and returns a new list 
+    by replacing all co-located particles with a single particle with
+    the same location, and the sum of the co-located particles mass.
     '''
     d = {}
     for p in particles:
@@ -128,7 +140,7 @@ def coalesce_particles(particles):
 
 def decay_particle(t, p):
     '''
-    Determines whether or not the specified PiltonParticle p can decay, and how it decays for timestep t.
+    Determines if and how the specified PiltonParticle p can decay, for timestep t.
     Returns a list containing either p (if no decay occurs) or the PiltonParticles that are p's decay products.
     '''
     decay_products = []
@@ -157,9 +169,6 @@ def decay_particles(t, particles):
     Returns a new particles list that is the result of applying decay_particle function
     to every PiltonParticle in the specified particles list, relative to timestep t.
     '''
-    # TODO 2018-5-28 Refactor nested for-loops into list comprehension -- is that possible?
-    nu = []
-    for p in particles:
-        for o in decay_particle(t, p):
-            nu.append(o)
-    return nu
+    # NOTE 2018-6-09
+    # Hat tip to drake@lclark.edu for making this expression comprehensible.
+    return [o for p in particles for o in decay_particle(t, p)]

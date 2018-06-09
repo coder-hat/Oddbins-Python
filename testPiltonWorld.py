@@ -115,7 +115,7 @@ class TestPiltonWorld(unittest.TestCase):
         self.assertTrue(ignoreOrderEqual(actual, expect), msg)
 
     # "Everybody want to rule the world" - Tears for Fears, 1985 
-    def testRunTheWorld(self):
+    def testPiltonWorldState(self):
         pwEngine = PiltonWorldState()
     
         max_timestep = max(self.EXPECT_WORLD_SEQUENCE.keys())
@@ -136,7 +136,8 @@ class TestPiltonWorld(unittest.TestCase):
 #----- Helper functions
 
 def ignoreOrderEqual(particles1, particles2):
-    if len(particles1) != len(particles2): return False
+    if len(particles1) != len(particles2):
+        return False
     for p in particles1:
         if p not in particles2: 
             # print("p={0} not in {1}".format(p, particles2))

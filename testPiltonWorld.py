@@ -12,6 +12,10 @@ from PiltonWorld import PiltonWorldState
 
 class TestPiltonWorld(unittest.TestCase):
 
+    # Tests use grid dimensions specified in Pilton's original paper.
+    _COLS = 7
+    _ROWS = 7
+
     def setUp(self):
 
         # A Dictionary containing successive states (timestep and Particles) of Pilton's Small World
@@ -69,7 +73,7 @@ class TestPiltonWorld(unittest.TestCase):
         allexpects.update({p: expect4 for p in expect4})
         for p in allexpects:
             expect = allexpects[p]
-            actual = PiltonWorld.find_molecule(p, allparticles)
+            actual = PiltonWorld.find_molecule(p, allparticles, self._COLS, self._ROWS)
             msg = "p={0} expect={1} actual={2}".format(p, expect, actual)
             self.assertTrue(ignoreOrderEqual(actual, expect), msg)
 
@@ -89,14 +93,14 @@ class TestPiltonWorld(unittest.TestCase):
         allexpects.update({p: others4 for p in source4})
         for p in allexpects:
             expect = allexpects[p]
-            actual = PiltonWorld.find_others(p, allparticles)
+            actual = PiltonWorld.find_others(p, allparticles, self._COLS, self._ROWS)
             msg = "p={0} expect={1} actual={2}".format(p, expect, actual)
             self.assertTrue(ignoreOrderEqual(actual, expect), msg)
 
     def testMoveParticles(self):
         source = makeParticles((0,0,4), (4,2,2), (2,4,2), (6,6,1), (6,4,1), (4,6,1), (4,4,1))
         expect = makeParticles((0,0,4), (0,0,1), (2,4,2), (4,2,2), (0,2,1), (2,0,1), (2,2,1))
-        actual = PiltonWorld.move_particles(6, source)
+        actual = PiltonWorld.move_particles(6, source, self._COLS, self._ROWS)
         msg = "source={0} expect={1} actual={2}".format(source, expect, actual)
         self.assertTrue(ignoreOrderEqual(actual, expect), msg)
 
@@ -110,13 +114,13 @@ class TestPiltonWorld(unittest.TestCase):
     def testDecayParticles(self):
         source = makeParticles((0,0,4), (4,2,2), (2,4,2), (5,5,1))
         expect = makeParticles((0,0,4), (4,2,2), (2,4,2), (6,6,1), (6,4,1), (4,6,1), (4,4,1))
-        actual = PiltonWorld.decay_particles(5, source)
+        actual = PiltonWorld.decay_particles(5, source, self._COLS, self._ROWS)
         msg = "source={0} expect={1} actual={2}".format(source, expect, actual)
         self.assertTrue(ignoreOrderEqual(actual, expect), msg)
 
     # "Everybody want to rule the world" - Tears for Fears, 1985 
     def testPiltonWorldState(self):
-        pwEngine = PiltonWorldState()
+        pwEngine = PiltonWorldState(self._COLS, self._ROWS)
     
         max_timestep = max(self.EXPECT_WORLD_SEQUENCE.keys())
         self.assertTrue(max_timestep > 0, "Has-data check")

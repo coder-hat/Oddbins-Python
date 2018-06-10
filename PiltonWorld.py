@@ -4,9 +4,6 @@ An implementation of the "Small World" described in Barry Pilton's article:
 https://ianstewartjoat.weebly.com/manifold-5.html
 '''
 
-_CELL_COLS = 7
-_CELL_ROWS = 7
-
 #----- particle class, particle class, particle class has location and mass!
 
 class PiltonParticle(tuple):
@@ -64,13 +61,15 @@ class PiltonParticle(tuple):
 
 class PiltonWorldState:
 
-    def __init__(self):
+    def __init__(self, numberOfCols, numberOfRows):
+        self._cols = numberOfCols
+        self._rows = numberOfRows
         self.timestep = 0
         self.particles = []
 
     def do_simulation_step(self):
         t = self.timestep + 1
-        self.particles = coalesce_particles(decay_particles(t, coalesce_particles(move_particles(t, self.particles))))
+        self.particles = coalesce_particles(decay_particles(t, coalesce_particles(move_particles(t, self.particles, self._cols, self._rows)), self._cols, self._rows))
         self.timestep = t
 
 #---- functions that change the world
@@ -78,13 +77,10 @@ class PiltonWorldState:
 # NOTE 2018-6-09
 # These functions exist only to change PiltonWorld state.
 # They should probably be encapsulated inside PiltonWorldState class.
-# But, if they were member functions, there'd be no sense in passing in timestep (or particles, in some cases).
-# Having them global makes the parameters explicit, which in turn makes unit testing them easier.
-# However, some of these "global" functions rely on the global column and row dimensions,
-# and that's something it would be nice to allow the user to modify per world in a GUI setting,
-# so they're not *really* independent as-is.
+# Encapsulation would reduce the parameter list per function, making the syntax cleaner.
+# But, having them global, with explicit parameters, makes unit testing individual functions easier.
 
-def find_molecule(p, particles):
+def find_molecule(p, particles, cols, rows):
     '''
     Returns the set of PiltonParticles in particles that are edge-adjacent-reachable to each other,
     starting at and including PiltonParticle p.
@@ -92,40 +88,40 @@ def find_molecule(p, particles):
     Diagonal-adjacency (sharing a common cell corner) does not count for molecule membership.
     '''
     molecule = {p}
-    adjacents = [o for o in particles if p.is_adjacent_to(o, _CELL_COLS, _CELL_ROWS)]
+    adjacents = [o for o in particles if p.is_adjacent_to(o, cols, rows)]
     if not adjacents:
         return molecule
     else:
         for a in adjacents:
             remaining = [o for o in particles if o not in adjacents and o != p]
-            molecule.update(find_molecule(a, remaining))
+            molecule.update(find_molecule(a, remaining, cols, rows))
         return molecule
 
-def find_others(p, particles):
+def find_others(p, particles, cols, rows):
     '''
     Returns the set of PiltonParticles in particles that are NOT edge-adjacent-reachable to PiltonParticle p.
     '''
-    return [o for o in particles if o not in find_molecule(p, particles)]
+    return [o for o in particles if o not in find_molecule(p, particles, cols, rows)]
 
-def move_particle(t, p, others):
+def move_particle(t, p, others, cols, rows):
     '''
     Moves (or leaves unmoved) PiltonParticle p, relative to timestep t.
     The others list contains all PiltonParticles currently in the world, but not part of p's molecule.
     Returns either a new particle at the new position, or the same particle if it does not move.
     '''
     if t % p.mass == 0:
-        x = (1 + sum([o.x for o in others])) % _CELL_COLS
-        y = (1 + sum([o.y for o in others])) % _CELL_ROWS
+        x = (1 + sum([o.x for o in others])) % cols
+        y = (1 + sum([o.y for o in others])) % rows
         return PiltonParticle(x, y, p.mass)
     else:
         return p
 
-def move_particles(t, particles):
+def move_particles(t, particles, cols, rows):
     '''
     Moves (or leaves unmoved) each PiltonParticle in the particles list relative to the current timestep t.
     Returns a new list of the particles in their new positions.
     '''
-    return [move_particle(t, p, find_others(p, particles)) for p in particles]
+    return [move_particle(t, p, find_others(p, particles, cols, rows), cols, rows) for p in particles]
 
 def coalesce_particles(particles):
     '''
@@ -138,37 +134,37 @@ def coalesce_particles(particles):
         d[p.location] = d[p.location] + p.mass if p.location in d else p.mass
     return [PiltonParticle(k[0], k[1], v) for (k, v) in d.items()]
 
-def decay_particle(t, p):
+def decay_particle(t, p, cols, rows):
     '''
     Determines if and how the specified PiltonParticle p can decay, for timestep t.
     Returns a list containing either p (if no decay occurs) or the PiltonParticles that are p's decay products.
     '''
     decay_products = []
     if t % p.mass == 0:
-        xdecays = p.x == (t % _CELL_COLS)
-        ydecays = p.y == (t % _CELL_ROWS)
+        xdecays = p.x == (t % cols)
+        ydecays = p.y == (t % rows)
         if xdecays and ydecays:
-            decay_products.append(PiltonParticle((p.x - 1) % _CELL_COLS, (p.y - 1) % _CELL_ROWS, p.mass))
-            decay_products.append(PiltonParticle((p.x + 1) % _CELL_COLS, (p.y - 1) % _CELL_ROWS, p.mass))
-            decay_products.append(PiltonParticle((p.x - 1) % _CELL_COLS, (p.y + 1) % _CELL_ROWS, p.mass))
-            decay_products.append(PiltonParticle((p.x + 1) % _CELL_COLS, (p.y + 1) % _CELL_ROWS, p.mass))
+            decay_products.append(PiltonParticle((p.x - 1) % cols, (p.y - 1) % rows, p.mass))
+            decay_products.append(PiltonParticle((p.x + 1) % cols, (p.y - 1) % rows, p.mass))
+            decay_products.append(PiltonParticle((p.x - 1) % cols, (p.y + 1) % rows, p.mass))
+            decay_products.append(PiltonParticle((p.x + 1) % cols, (p.y + 1) % rows, p.mass))
         elif xdecays:
-            decay_products.append(PiltonParticle((p.x - 1) % _CELL_COLS, p.y, p.mass))
-            decay_products.append(PiltonParticle((p.x + 1) % _CELL_COLS, p.y, p.mass))
+            decay_products.append(PiltonParticle((p.x - 1) % cols, p.y, p.mass))
+            decay_products.append(PiltonParticle((p.x + 1) % cols, p.y, p.mass))
         elif ydecays:
-            decay_products.append(PiltonParticle(p.x, (p.y - 1) % _CELL_ROWS, p.mass))
-            decay_products.append(PiltonParticle(p.x, (p.y + 1) % _CELL_ROWS, p.mass))
+            decay_products.append(PiltonParticle(p.x, (p.y - 1) % rows, p.mass))
+            decay_products.append(PiltonParticle(p.x, (p.y + 1) % rows, p.mass))
         else:
             decay_products.append(p)
     else:
         decay_products.append(p)
     return decay_products
 
-def decay_particles(t, particles):
+def decay_particles(t, particles, cols, rows):
     '''
     Returns a new particles list that is the result of applying decay_particle function
     to every PiltonParticle in the specified particles list, relative to timestep t.
     '''
     # NOTE 2018-6-09
     # Hat tip to drake@lclark.edu for making this expression comprehensible.
-    return [o for p in particles for o in decay_particle(t, p)]
+    return [o for p in particles for o in decay_particle(t, p, cols, rows)]

@@ -72,6 +72,11 @@ class PiltonWorldState:
         self.particles = coalesce_particles(decay_particles(t, coalesce_particles(move_particles(t, self.particles, self._cols, self._rows)), self._cols, self._rows))
         self.timestep = t
 
+    def do_simulation_reset(self):
+        self.timestep = 0
+        self.particles = []
+
+
 #---- functions that change the world
 #
 # NOTE 2018-6-09

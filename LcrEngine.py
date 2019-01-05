@@ -116,16 +116,22 @@ class LcrEngine:
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Plays the LCR game.')
-    parser.add_argument('-p', '--players', type=int, default=5, help='specifies number of players per game (must be > 1)')
+    parser.add_argument('-p', '--players', type=int, default=5, help='the number of players per game (must be > 1)')
+    parser.add_argument('-g', '--games', type=int, default=1, help='the number of games to play')
     args = parser.parse_args()
 
-    player_count = args.players
+    for games_played in range(args.games):
 
-    lcr = LcrEngine(players=player_count)
-    print(lcr.csv_header_string())
-    print(lcr.csv_state_string())
+        lcr = LcrEngine(players=args.players)
+        if args.games == 1:
+            print(lcr.csv_header_string())
+            print(lcr.csv_state_string())
+        elif games_played == 0:
+            print('{0},{1}'.format('Game', lcr.csv_header_string()))
 
-    while not lcr.game_over():
-        lcr.play_a_round()
-        print(lcr.csv_state_string())
-        
+        while not lcr.game_over():
+            lcr.play_a_round()
+            if args.games == 1:
+                print(lcr.csv_state_string())
+            elif lcr.game_over():
+                print('{0},{1}'.format(games_played, lcr.csv_state_string()))

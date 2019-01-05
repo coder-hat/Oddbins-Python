@@ -7,9 +7,13 @@ The game is completely based on luck.
 It requires no player strategy at all, and is thus simple to automate.
 '''
 
+import argparse
 import random
 
 class LcrEngine:
+    '''
+    Contains the data state and methods required to play one or more games of LCR.
+    '''
 
     MIN_PLAYER_COUNT = 2
 
@@ -111,10 +115,17 @@ class LcrEngine:
 
 if __name__ == "__main__":
 
-    lcr = LcrEngine(players=5)
+    parser = argparse.ArgumentParser(description='Plays the LCR game.')
+    parser.add_argument('-p', '--players', type=int, default=5, help='specifies number of players per game (must be > 1)')
+    args = parser.parse_args()
+
+    player_count = args.players
+
+    lcr = LcrEngine(players=player_count)
     print(lcr.csv_header_string())
     print(lcr.csv_state_string())
 
     while not lcr.game_over():
         lcr.play_a_round()
         print(lcr.csv_state_string())
+        

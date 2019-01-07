@@ -111,6 +111,41 @@ class LcrEngine:
         self.center += 1
         self.tokens[player_index] -= 1
 
+
+class LcrEngineCenterVariant1(LcrEngine):
+    '''
+    This variant changes one aspect of the original LcrEngine's game rules:
+    When a player rolls all dots for a given turn, the player receives all
+    tokens currently in the center.
+    '''
+    
+    def __init__(self, players=3):
+        super(LcrEngineCenterVariant1, self).__init__(players)
+
+    def play_a_turn(self, player_index):
+        '''
+        A player takes a turn by rolling 1 to 3 die, depending on the number of tokens the player has.
+        Each die rolled is resolved, and then the player's turn is over.
+        A player with zero tokens simply passes their turn -- they may be able to play in future rounds
+        if they receive tokens from adjacent players during those player's turns.
+        '''
+        player_tokens = self.tokens[player_index]
+        if player_tokens > 0:
+            player_dice = player_tokens if player_tokens < 4 else 3
+            player_dots = 0
+            for i in range(player_dice):
+                die_roll = self.roll()
+                if die_roll == 'Dot':
+                    player_dots += 1
+                self.roll_action[die_roll](player_index)
+            if player_dots == player_dice:
+                self.do_take_center(player_index)
+
+    def do_take_center(self, player_index):
+        self.tokens[player_index] += self.center
+        self.center = 0
+
+
 #----- default main plays a game with 5 players
 
 if __name__ == "__main__":
@@ -118,11 +153,17 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Plays the LCR game.')
     parser.add_argument('-p', '--players', type=int, default=5, help='the number of players per game (must be > 1)')
     parser.add_argument('-g', '--games', type=int, default=1, help='the number of games to play')
+    parser.add_argument('-e', '--engine', type=str, default='s', choices={'s', 'cv1'}, help='the engine type to use to play the game')
     args = parser.parse_args()
 
     for games_played in range(args.games):
 
+        # default engine assignment ...
         lcr = LcrEngine(players=args.players)
+        # ... possibly changed by user command-line selection
+        if args.engine == 'cv1':
+            lcr = LcrEngineCenterVariant1(players=args.players)
+
         if args.games == 1:
             print(lcr.csv_header_string())
             print(lcr.csv_state_string())

@@ -69,8 +69,9 @@ class LcrEngine:
         player_tokens = self.tokens[player_index]
         if player_tokens > 0:
             player_dice = player_tokens if player_tokens < 4 else 3
-            for i in range(player_dice):
-                self.roll_action[self.roll()](player_index)
+            player_rolls = [self.roll() for i in range(player_dice)]
+            for r in player_rolls:
+                self.roll_action[r](player_index)
 
     # Ordinarily, letting random default-initialize via the system clock is fine.
     # The set_seed method provides and API-explicit way to "lock" on to a prng sequence
@@ -139,13 +140,10 @@ class LcrEngineCenterVariant1(LcrEngine):
         player_tokens = self.tokens[player_index]
         if player_tokens > 0:
             player_dice = player_tokens if player_tokens < 4 else 3
-            player_dots = 0
-            for i in range(player_dice):
-                die_roll = self.roll()
-                if die_roll == 'Dot':
-                    player_dots += 1
-                self.roll_action[die_roll](player_index)
-            if player_dots == player_dice:
+            player_rolls = [self.roll() for i in range(player_dice)]
+            for r in player_rolls:
+                self.roll_action[r](player_index)
+            if player_rolls.count('Dot') == player_dice:
                 self.do_take_center(player_index)
 
     def do_take_center(self, player_index):

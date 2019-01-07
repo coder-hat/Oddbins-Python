@@ -72,6 +72,13 @@ class LcrEngine:
             for i in range(player_dice):
                 self.roll_action[self.roll()](player_index)
 
+    # Ordinarily, letting random default-initialize via the system clock is fine.
+    # The set_seed method provides and API-explicit way to "lock" on to a prng sequence
+    # for unit-testing of the LcrEngine.
+    
+    def set_seed(self, a=1234):
+        random.seed(a=a)
+
     def roll(self):
         return self.faces[random.randrange(len(self.faces))]
     

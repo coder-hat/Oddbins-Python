@@ -10,18 +10,18 @@ class TestGolAR(unittest.TestCase):
     #
     # ###
     #
-    blinker1 = [(1, 1), (2, 1), (3, 1)]
+    blinker1 = {(1, 1), (2, 1), (3, 1)}
     #  #
     #  #
     #  #
-    blinker2 = [(2, 0), (2, 1), (2, 2)] 
+    blinker2 = {(2, 0), (2, 1), (2, 2)} 
 
     # acorn is the starting configuration of live-cells
     # Alex R. used as an example in his article.
     #  ##  ###
     #     #
     #   #
-    acorn = [(1, 1), (2, 1), (2, 3), (4, 2), (5, 1), (6, 1), (7, 1)]
+    acorn = {(1, 1), (2, 1), (2, 3), (4, 2), (5, 1), (6, 1), (7, 1)}
 
     def test_conway_rules(self):
         # Input and expected-result data for all valid input values
@@ -63,9 +63,15 @@ class TestGolAR(unittest.TestCase):
     
     def test_step(self):
         actual = GolAR.step(GolAR.conway_rules, GolAR.neighbors_rect, TestGolAR.blinker1)
-        self.assertCountEqual(actual, TestGolAR.blinker2, "Step 1")
+        self.assertCountEqual(actual, TestGolAR.blinker2, "step 1")
         actual = GolAR.step(GolAR.conway_rules, GolAR.neighbors_rect, actual)
-        self.assertCountEqual(actual, TestGolAR.blinker1, "Step 2")
+        self.assertCountEqual(actual, TestGolAR.blinker1, "step 2")
+
+    def test_life(self):
+        gol = GolAR.life(TestGolAR.blinker1)
+        self.assertCountEqual(next(gol), TestGolAR.blinker2, "life 1")
+        self.assertCountEqual(next(gol), TestGolAR.blinker1, "life 2")
+        self.assertCountEqual(next(gol), TestGolAR.blinker2, "life 3")
 
 if __name__ == '__main__':
     unittest.main()

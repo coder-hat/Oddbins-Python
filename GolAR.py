@@ -39,6 +39,7 @@ def step(rules, neighbors, live_cells):
 # through a stream-cons form.
 # I *think* implementing a Generator is a Python equivalent.
 def life(live_cells):
+    last_generation = live_cells
     while True:
         this_generation = step(conway_rules, neighbors_rect, last_generation)
         yield this_generation

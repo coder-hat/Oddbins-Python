@@ -5,15 +5,18 @@ Ad-hoc code related to palindromes.
 def is_palindrome_permutation(s):
     '''
     Determines whether s is a sequence of characters that is permutable into a palindrome.
+    An s of None, '', or a single characters is a palindrome and thus also permutable to
+    a palindrome.
     This is only true when every character but one in s appears an even number of times.
     returns True if s is a palindrome permutation, False otherwise.
     '''
     letters = set()
-    for c in s:
-        if c in letters:
-            letters.remove(c)
-        else:
-            letters.add(c)
+    if s:
+        for c in s:
+            if c in letters:
+                letters.remove(c)
+            else:
+                letters.add(c)
     return len(letters) < 2
 
 def is_palindrome(s):
@@ -33,9 +36,11 @@ def is_palindrome(s):
         return is_palindrome(s[1:-1])
     return True
 
+# Iteration version of is_palindrome -- for possible timing comparisons.
 def is_palindrome_iter(s):
     while s and len(s) > 1:
         if s[0] == s[-1:]:
             s = s[1:-1]
         else:
             return False
+    return True
